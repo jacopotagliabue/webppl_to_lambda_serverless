@@ -1,0 +1,25 @@
+frameworkVersion: ">=1.15.2"
+
+service: webppl-lambda-tutorial
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: us-west-2
+
+functions:
+  app:
+    handler: handler.app
+    events:
+      - http:
+          path: /app
+          method: get
+          cors: true
+  model:
+    handler: handler.model
+    events:
+      - http:
+          path: /model
+          method: get
+          cors: true
