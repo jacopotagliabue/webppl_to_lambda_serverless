@@ -18,6 +18,7 @@ functions:
           cors: true
   model:
     handler: handler.model
+    timeout: 15
     events:
       - http:
           path: /model
