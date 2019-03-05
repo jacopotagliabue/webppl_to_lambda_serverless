@@ -39,7 +39,7 @@ module.exports.app = (event, context, callback) => {
                         })
                     });
                 drawLineChart(chartData);
-            });
+            }).error(function() { alert("Error! Inspect the JS console!"); });
         });
         
         var randomIntInRange = function(min, max) {
@@ -84,6 +84,34 @@ const replyJson = (callback, statusCode, body) => {
 module.exports.model = (event, context, callback) => {
     // just print the event to cloudwatch for debug/inspection
     console.log(event);
+
+    // set some default value
+    var xStart = -4;
+    var xEnd = -4;
+    var xStep = 0.5;
+    var nSeries = 4; // we are just faking this to be compulsory
+
+
+    // if no param at all or missing a mandatory one, throw error
+    if (!event.queryStringParameters || !event.queryStringParameters.nSeries) {
+        var errorMessage = "Mandatory parameters are missing! Query parameters received: " + event.queryStringParameter;
+
+        // var error = new Error(errorMessage);
+        // if you return this, the string gets logged to cloudwatch -> https://docs.aws.amazon.com/en_us/lambda/latest/dg/nodejs-prog-mode-exceptions.html
+        // callback(error);
+
+        // wrap error around JSON
+        replyJson(callback, 503, {error: errorMessage});
+    }
+    else {
+        // overwrite params if there
+        xStart = event.queryStringParameters.xStart ? event.queryStringParameters.xStart : xStart;
+        xEnd = event.queryStringParameters.xEnd ? event.queryStringParameters.xEnd : xEnd;
+        xStep = event.queryStringParameters.xStep ? event.queryStringParameters.xStep : xStep;
+        nSeries = event.queryStringParameters.nSeries;
+        // dump to console for debug/inspection
+        console.log([xStart, xEnd, xStep, nSeries]);
+    }
 
     const code = `
         var N_SERIES = 4;
