@@ -27,7 +27,10 @@ module.exports.app = (event, context, callback) => {
     <script>
         $("#WebPPLBtn" ).click(function() {
             
-           $.getJSON("/dev/model", function(data) {
+            $.ajax({
+              url: "/dev/model",
+              dataType: 'json',
+              success: function(data) {
                 console.log("Drawing line chart with..." + data);
                 var chartData = [];
                 $.each(data['val'], function(index, series) {
@@ -39,7 +42,9 @@ module.exports.app = (event, context, callback) => {
                         })
                     });
                 drawLineChart(chartData);
-            }).error(function() { alert("Error! Inspect the JS console!"); });
+              },
+              error: function(err) { alert("Error: "+ err); }
+            });  
         });
         
         var randomIntInRange = function(min, max) {
