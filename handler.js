@@ -29,9 +29,14 @@ module.exports.app = (event, context, callback) => {
             
             $.ajax({
               url: "/dev/model",
+              type: "get", 
+              data: { 
+                nSeries: 4
+              },
               dataType: 'json',
+              // on success, draw data with chart.js
               success: function(data) {
-                console.log("Drawing line chart with..." + data);
+                console.log("Data received: " + JSON.stringify(data));
                 var chartData = [];
                 $.each(data['val'], function(index, series) {
                      chartData.push({
@@ -43,7 +48,8 @@ module.exports.app = (event, context, callback) => {
                     });
                 drawLineChart(chartData);
               },
-              error: function(err) { alert("Error: "+ err); }
+              // if something is wrong, just print an alert
+              error: function(err) { alert("Error: " + JSON.stringify(err)); }
             });  
         });
         
