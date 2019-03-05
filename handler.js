@@ -14,6 +14,7 @@ module.exports.app = (event, context, callback) => {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
         <link rel="icon" href="https://tooso.ai/assets/favicon.ico" />
         <style>
+
         </style>
     </head>
     <body>
@@ -21,12 +22,9 @@ module.exports.app = (event, context, callback) => {
       <div>
         <input type="button" value="Probabilistic magic!" id="WebPPLBtn" />
       </div>
-      <div>
-        <canvas id="gpPriorsCanvas" />
-      </div>
+      <div id="graph-container"></div>
     </body>
     <script>
-        var targetDiv = 'gpPriorsCanvas';
         $("#WebPPLBtn" ).click(function() {
             
            $.getJSON("/dev/model", function(data) {
@@ -40,7 +38,7 @@ module.exports.app = (event, context, callback) => {
                             data: series
                         })
                     });
-                drawLineChart(chartData, targetDiv);
+                drawLineChart(chartData);
             });
         });
         
@@ -52,11 +50,14 @@ module.exports.app = (event, context, callback) => {
             return randomIntInRange(0, 256);
         };
         
-        var drawLineChart = function(data, targetDiv) {
-            var ctx = document.getElementById(targetDiv).getContext('2d');
+        var drawLineChart = function(data) {
+            $('#gpPriorsCanvas').remove();
+            $('#graph-container').append('<canvas id="gpPriorsCanvas" height="540" width="960"><canvas>');
+            var ctx = document.getElementById('gpPriorsCanvas').getContext('2d');
             var chart = new Chart(ctx, {
                 type: 'scatter',
-                data: { datasets: data }
+                data: { datasets: data },
+                options: { responsive: false }
             });
         };
     </script>
