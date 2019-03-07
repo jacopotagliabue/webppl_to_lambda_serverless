@@ -14,25 +14,65 @@ module.exports.app = (event, context, callback) => {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
         <link rel="icon" href="https://tooso.ai/assets/favicon.ico" />
         <style>
-
+            body {
+                margin: 0;
+                font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+                font-size: 14px;
+                padding: 20px;
+            }
+            #inputContainer {
+                margin-bottom: 20px;
+            }
+            input {
+                font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+                font-size: 12px;
+            }
         </style>
     </head>
     <body>
-      <h1>WebPPL App</h1>
+      <h1>Gaussian Processes Vizualizer</h1>
       <div>
+        <div id="inputContainer"></div>
         <input type="button" value="Probabilistic magic!" id="WebPPLBtn" />
       </div>
       <div id="graph-container"></div>
     </body>
     <script>
+        
+        // define input fields for the GP function with some default and description
+        var INPUT_FIELDS = [
+            {'input': 'xStart', 'default': -4, 'description': 'Start value for X-axis'},
+            {'input': 'xEnd', 'default': 4.1, 'description': 'End value for X-axis'},
+            {'input': 'xStep', 'default': 0.5, 'description': 'Step for the range xStart-xEnd'},
+            {'input': 'nSeries', 'default': 4, 'description': 'Number of priors to sample'}
+        ]
+    
+        // on doc ready, display input fields/labels
+        $( document ).ready(function() {
+            console.log( "ready!" );
+            // loop over input fields value and display them
+            $.each(INPUT_FIELDS, function(index, f) {
+                var newEl = f['input'] + ' (i.e. ' + f['description'] + ')&nbsp;&nbsp;<input style="width:50px;" type="text" id="' + f['input']  + 'Txt" value="' + f['default'] + '" /><br/>';
+                $("#inputContainer").append(newEl);
+            });
+        });
+    
+        // bind ajax call to on click event
         $("#WebPPLBtn" ).click(function() {
             
+            // loop over input fields to get values for params
+            var params = {}
+            $.each(INPUT_FIELDS, function(index, f) {
+                params[f['input']] =  parseFloat($("#" + f['input'] + "Txt").val());
+            });
+            
+            console.log('Ajax params are: ' + JSON.stringify(params));
+            
+            // make ajax call to model API
             $.ajax({
               url: "/dev/model",
               type: "get", 
-              data: { 
-                nSeries: 4
-              },
+              data: params,
               dataType: 'json',
               // on success, draw data with chart.js
               success: function(data) {
@@ -52,6 +92,8 @@ module.exports.app = (event, context, callback) => {
               error: function(err) { alert("Error: " + JSON.stringify(err)); }
             });  
         });
+        
+        // display/chart code below
         
         var randomIntInRange = function(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -96,9 +138,9 @@ module.exports.model = (event, context, callback) => {
     // just print the event to cloudwatch for debug/inspection
     console.log(event);
 
-    // set some default value
+    // set some default values
     var xStart = -4;
-    var xEnd = -4;
+    var xEnd = 4.1;
     var xStep = 0.5;
     var nSeries = 4; // we are just faking this to be compulsory
 
@@ -111,7 +153,7 @@ module.exports.model = (event, context, callback) => {
         // if you return this, the string gets logged to cloudwatch -> https://docs.aws.amazon.com/en_us/lambda/latest/dg/nodejs-prog-mode-exceptions.html
         // callback(error);
 
-        // wrap error around JSON
+        // wrap error in a nicer JSON format
         replyJson(callback, 503, {error: errorMessage});
     }
     else {
