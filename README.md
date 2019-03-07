@@ -1,15 +1,20 @@
 # Serving webppl models with an (AWS Lambda-powered) endpoint
 
 ## Overview
-This repo is a WIP: the goal is to share some elementary working code 
-running a probabilistic [WebPPL](http://webppl.org/) program in AWS Lambda and display 
+The repo contains the code for our [Medium](https://medium.com/tooso) post "Build smart(er) applications with probabilistic models and AWS Lambda functions": 
+the goal is to share some elementary working code running a probabilistic [WebPPL](http://webppl.org/) program in AWS Lambda and display 
 some nice charts as a result with the help of libraries like
 [JQuery](https://jquery.com/) and [ChartJS](https://www.chartjs.org/).
 
 Please refer to the original blog post for context and details on the project structure.
 
 ## App structure
-TBC
+The app structure depends on two key files:
+
+* `handler.js`, which contains the two main functions, one generating a web app, the other running the probabilistic model;
+* `serverless.yml`, which contains the definition of the AWS infrastructure that will run the functions when triggered through API gateway.
+
+Please refer to the original blog post for details.
 
 ## Deploy with serverless 
 It's assumed you have `npm` and `Serverless` up and running (see [here](https://serverless.com/)). Then:
