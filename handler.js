@@ -93,7 +93,7 @@ module.exports.app = (event, context, callback) => {
             });  
         });
         
-        // display/chart code below
+        // DISPLAY CHART CODE BELOW WITH SOME HELPER FUNCTIONS
         
         var randomIntInRange = function(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -105,8 +105,9 @@ module.exports.app = (event, context, callback) => {
         
         var drawLineChart = function(data) {
             $('#gpPriorsCanvas').remove();
-            $('#graph-container').append('<canvas id="gpPriorsCanvas" height="540" width="960"><canvas>');
+            $('#graph-container').append('<canvas id="gpPriorsCanvas" height="405" width="720"><canvas>');
             var ctx = document.getElementById('gpPriorsCanvas').getContext('2d');
+            // chart with chart.js
             var chart = new Chart(ctx, {
                 type: 'scatter',
                 data: { datasets: data },
@@ -166,22 +167,35 @@ module.exports.model = (event, context, callback) => {
         console.log([xStart, xEnd, xStep, nSeries]);
     }
 
+    // the easiest way to pass parameters to the model is to declare a code snippet on top and use the variables
+    // in the model accordingly
+    var modelParams = `
+        var N_SERIES = ${nSeries};
+        var X_START = ${xStart};
+        var X_END = ${xEnd};
+        var X_STEP = ${xStep}; 
+    `;
+
+    // model params here
+    console.log("Model params are: " + JSON.stringify(modelParams));
+
     const code = `
-        var N_SERIES = 4;
-        
+        // calculate RBF Kernel
         var radialBasisKernel = function(x, y) {
             return Math.exp(-0.5 * Math.pow(x - y, 2));
         }
         
+        // apply kernel function to tensors
         var applyKernelFunction = function(xa, xb, kernelFunction) {
             return mapN(function(y) { mapN(function(i) { return kernelFunction(xa[y], xb[i]); }, xb.length)}, xa.length)
         };
         
+        // produce a vector of zeros for the given size
         var zeroVector = function(size) {
           return Vector(repeat(size, function(x) { return 0.0; }));
         }
         
-        var xs = _.range(-4,4.1, 0.5);
+        var xs = _.range(X_START, X_END, X_STEP);
         var covTensor = Matrix(applyKernelFunction(xs, xs, radialBasisKernel));
         var ys = repeat(N_SERIES, function(x) { return sample(MultivariateGaussian({mu: zeroVector(xs.length), cov: covTensor})); });
         
@@ -192,8 +206,8 @@ module.exports.model = (event, context, callback) => {
         // finally, for each series print out the pairs x, y
         map(function(ySeries) { return mapN(function(n) { return {x: xs[n], y: ySeries[n]}; }, xs.length)}, yVals);`;
 
-    // running webppl code
-    webppl.run(code, (s, val) => {
+    // running webppl code as the concatenation of model params + model code
+    webppl.run(modelParams + code, (s, val) => {
         replyJson(callback, 200, { s, val });
     });
 
