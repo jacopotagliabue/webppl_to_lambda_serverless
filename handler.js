@@ -162,7 +162,7 @@ module.exports.model = (event, context, callback) => {
         xStart = event.queryStringParameters.xStart ? event.queryStringParameters.xStart : xStart;
         xEnd = event.queryStringParameters.xEnd ? event.queryStringParameters.xEnd : xEnd;
         xStep = event.queryStringParameters.xStep ? event.queryStringParameters.xStep : xStep;
-        nSeries = event.queryStringParameters.nSeries;
+        nSeries = parseInt(event.queryStringParameters.nSeries); // this NEEDS to be an int
         // dump to console for debug/inspection
         console.log([xStart, xEnd, xStep, nSeries]);
     }
