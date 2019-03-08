@@ -180,7 +180,7 @@ module.exports.model = (event, context, callback) => {
     console.log("Model params are: " + JSON.stringify(modelParams));
 
     const code = `
-        // calculate RBF Kernel
+        // calculate RBF Kernel (a.k.a. exponentiated quadratic covariance function), assuming sigma=1
         var radialBasisKernel = function(x, y) {
             return Math.exp(-0.5 * Math.pow(x - y, 2));
         }
@@ -195,6 +195,8 @@ module.exports.model = (event, context, callback) => {
           return Vector(repeat(size, function(x) { return 0.0; }));
         }
         
+        // we sample N_SERIES different function realisations from our GP with RBF Kernel
+        // without any observed data
         var xs = _.range(X_START, X_END, X_STEP);
         var covTensor = Matrix(applyKernelFunction(xs, xs, radialBasisKernel));
         var ys = repeat(N_SERIES, function(x) { return sample(MultivariateGaussian({mu: zeroVector(xs.length), cov: covTensor})); });
